@@ -1,0 +1,9 @@
+{
+  "width": 64,
+  "height": 64,
+  "channels": 1,
+  "layout": "NHWC",
+  "resize": "integer_nearest",
+  "grayscale": "integer_601",
+  "normalization": "divide_255"
+}

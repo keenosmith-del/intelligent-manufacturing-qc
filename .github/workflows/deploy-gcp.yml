@@ -1,0 +1,44 @@
+name: Optional approved Cloud Run deployment
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy:
+    if: ${{ vars.GCP_PROJECT_ID != '' && vars.WIF_PROVIDER != '' && vars.DEPLOY_SERVICE_ACCOUNT != '' }}
+    runs-on: ubuntu-latest
+    environment: gcp-production
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      REPOSITORY: ${{ vars.ARTIFACT_REPOSITORY }}
+      SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+      RUNTIME_ACCOUNT: ${{ vars.RUNTIME_SERVICE_ACCOUNT }}
+      BUCKET: ${{ vars.GCS_BUCKET }}
+      CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Validate explicit configuration
+        run: |
+          test -n "$REGION" && test -n "$REPOSITORY" && test -n "$SERVICE"
+          test -n "$RUNTIME_ACCOUNT" && test -n "$BUCKET" && test -n "$CORS_ORIGIN"
+      - name: Build and publish immutable image
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT/$REPOSITORY/qc-api:$GITHUB_SHA"
+          docker build -f backend/Dockerfile -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Deploy private, single-instance API
+        run: |
+          gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --project "$PROJECT" \
+            --service-account "$RUNTIME_ACCOUNT" --no-allow-unauthenticated --max-instances 1 \
+            --concurrency 8 --cpu 1 --memory 1Gi --port 5050 \
+            --set-env-vars "FIRESTORE_PROJECT_ID=$PROJECT,STORAGE_PROVIDER=gcs,GCS_BUCKET=$BUCKET,MODEL_ARTIFACT_PATH=/artifacts,CORS_ORIGIN=$CORS_ORIGIN,ALLOW_SYNTHETIC=false" \
+            --set-secrets 'ADMIN_TOKEN=qc-operator-token:latest'

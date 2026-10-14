@@ -1,206 +1,83 @@
 # Intelligent Manufacturing Quality Control
 
-**Machine Learning Engineering · MLOps · Rust · TensorFlow · Computer Vision**
+**React · Rust · TensorFlow · ONNX Runtime · Firestore · MLOps**
 
-An intelligent manufacturing quality-control platform that uses deep learning to classify visual product defects, a Rust-based inference service for prediction delivery, and automated MLOps workflows for model validation and deployment.
+An independent ML engineering portfolio project by **Keeno Smith**. A working local visual-inspection platform that classifies six known steel surface-defect patterns, preserves human review and traces the model lifecycle from dataset preparation to rollback.
 
-The project demonstrates the complete machine learning lifecycle, from dataset preparation and neural network training to inference, monitoring and controlled model releases.
+The product supports inspection consistency and traceability. It does **not** make industrial pass/fail decisions, classify normal products or detect every possible defect. No business improvement or production accuracy is claimed.
 
-## Overview
+## Implemented Version 1
 
-Manufacturing quality-control processes depend on accurate and consistent defect detection.
+- React/Vite/TypeScript/Tailwind application: Overview, Inspections, Review Queue, Model Lab and MLOps & Monitoring, plus inspection detail.
+- Actual configurable TensorFlow CNN training, image validation/deduplication, reproducible stratified splits, checkpointing, held-out metrics, error/calibration analysis and independent reevaluation.
+- ONNX opset 17 export, executable graph checks and numerical parity; **Rust** executes online inference in a cached ONNX Runtime session.
+- Firestore records, local/GCS object storage, filtered/paginated history and immutable prediction evidence with separate human corrections.
+- Versioned model registry, compatible evaluation comparison, configurable quality gates, actual session activation, rejected releases and rollback.
+- Stored-data monitoring, class/confidence/latency distributions, reviewed-sample agreement, PSI warnings and persistent snapshots.
+- Application CI, manual ML validation and optional private Cloud Run deployment through OIDC/WIF.
 
-Manual visual inspection can introduce variability, slow down quality reviews and make it difficult to maintain consistent inspection records.
+```mermaid
+flowchart LR
+  TensorFlow[Offline TensorFlow training] --> ONNX[Versioned ONNX package]
+  React[React frontend] --> Rust[Rust Axum API]
+  ONNX --> Rust
+  Rust --> Runtime[ONNX Runtime inference]
+  Rust --> Firestore[Firestore records]
+  Rust --> Storage[Local / GCS objects]
+```
 
-This project explores how a custom-trained computer vision model can support manufacturing inspection workflows while providing engineering controls for monitoring, evaluating and improving deployed models.
+## Quick start
 
-Unlike an application that only consumes an external AI API, this platform will include direct model development and training using TensorFlow.
+Prerequisites: Python 3.12, Node 24, Rust with rustfmt/Clippy, Docker Desktop. Commands run from the repository root.
 
-## Business Problem
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r ml/requirements.txt
+npm ci --prefix frontend
+cp backend/.env.example backend/.env
+# Edit backend/.env: set ADMIN_TOKEN, MODEL_ARTIFACT_PATH=artifacts,
+# LOCAL_STORAGE_PATH=.storage and ALLOW_SYNTHETIC=true for local smoke mode.
+export ADMIN_TOKEN='replace-with-a-long-local-operator-token'
+docker compose up -d firestore
+./scripts/bootstrap-smoke.sh smoke-a
+./scripts/serve-api.sh
+```
 
-Manufacturing organizations face challenges involving:
+In another terminal: `npm run dev --prefix frontend`. Open http://localhost:5173. Enter the same token under Operator access; Model Lab → register `smoke-a` → validate & activate → Inspections → upload `data/synthetic/<class>/000.png` → review the prediction. API defaults to :5050; emulator to :8080. Full setup, command examples and port-conflict handling are in [setup](docs/setup.md).
 
-- Inconsistent manual defect classification.
-- Delayed identification and investigation of defects.
-- Limited visibility into inspection performance.
-- Difficulty maintaining traceable inspection histories.
-- Model performance degradation as production data changes.
-- Risky or inconsistent deployment of updated ML models.
+A small actual trained ONNX CI fixture is included, allowing integration without retraining: start the API/emulator and run `ADMIN_TOKEN="$ADMIN_TOKEN" .venv/bin/python scripts/api-smoke.py`. This creates clearly synthetic test versions/inspections with real model outputs.
 
-## Proposed Solution
+## Training, inference and verification
 
-A full-stack machine learning application combining visual inspection, model inference, human review and automated ML delivery.
+```sh
+# Train another actual model on the same split, then independently validate export.
+PYTHONPATH=ml/src .venv/bin/python -m qc train --version smoke-b --config ml/configs/smoke-b.json --epochs 35
+.venv/bin/python scripts/validate-artifact.py artifacts/smoke-a --tensorflow
+PYTHONPATH=ml/src .venv/bin/python -m qc evaluate --package artifacts/smoke-a
+./scripts/check.sh
+```
 
-### Intelligent Visual Inspection
+The intended real dataset is NEU-CLS; rights-verified acquisition and the exact input layout are documented in [machine learning](docs/machine-learning.md). No third-party images are bundled because redistribution terms were not established. Actual implementation training used 216 project-owned **procedural smoke images**. Smoke-a/b obtained macro-F1 1.0 on 36 held-out synthetic samples; this is software verification, **not industrial model quality**. Full TensorFlow/ONNX Runtime 1.23.2 parity passed with max error 4.77e-7. Rust shared pixel/probability parity passed.
 
-- Upload manufacturing inspection images.
-- Classify known defect categories using a trained computer vision model.
-- Return prediction confidence and model version.
-- Display results through an interactive inspection dashboard.
-- Record inspection outcomes for later analysis.
-- Allow quality engineers to review and correct predictions.
+Verified: 6 Python tests, 9 Rust tests, 6 frontend tests; lint/format/typechecks; Rust release and frontend production builds; real emulator-backed inspection/review/release/rollback/snapshot workflows; non-root container inference; responsive browser views and persisted browser review. Browser file-chooser upload was blocked by the automation tool; API and component upload passed. See [testing](docs/testing.md) for actual commands, failures, measurements and coverage gaps.
 
-### Machine Learning Engineering
+## Local containers and cloud readiness
 
-- Prepare and validate labelled image datasets.
-- Train an image classifier using TensorFlow/Keras.
-- Evaluate alternative model architectures.
-- Track model versions, configurations and evaluation results.
-- Export trained models for inference.
-- Validate numerical consistency between training and deployed inference.
-- Analyze classification failures and model limitations.
+`ADMIN_TOKEN=... docker compose up --build -d` runs frontend/API/emulator. Train outside the web containers and register mounted packages in Model Lab. Compose uses its own project namespace/named image/artifact volume. This Mac's default ports are occupied by other projects; verification used :5051/:5175 for direct mode and temporary overrides for containers. Default-port configuration remains :5050/:5173.
 
-### MLOps & Model Delivery
+Cloud integration and a manual approved deployment workflow are implemented but **GCP was not accessed or deployed**. Cloud IAM browser access, WIF permissions, storage/service configuration and a rights-verified real model must be validated before production use. The V1 release coordinator supports one backend instance. See [deployment](docs/deployment.md).
 
-- Automate software and model validation.
-- Version model artifacts and evaluation metadata.
-- Introduce quality gates before model promotion.
-- Deploy containerized inference services.
-- Monitor prediction behaviour and inference performance.
-- Collect reviewer feedback to support future model improvements.
-- Support controlled model rollback.
+## Engineering guide
 
-## Technology Stack
+| Area | Location |
+|---|---|
+| Frontend pages, UI and Fetch client | `frontend/src/` |
+| Rust routes, inference, Firestore/storage and releases | `backend/src/` |
+| Dataset, TensorFlow/export and offline evaluation | `ml/src/qc/` |
+| Reproducible smoke, validation, integration and benchmark commands | `scripts/` |
+| Actual small trained ONNX fixtures | `tests/fixtures/` |
+| Software, ML and optional cloud workflows | `.github/workflows/` |
 
-| Layer             | Technologies                                                   |
-| ----------------- | -------------------------------------------------------------- |
-| Frontend          | React, TypeScript, Tailwind CSS                                |
-| Inference Backend | Rust, Axum, Tokio                                              |
-| Machine Learning  | Python, TensorFlow, Keras                                      |
-| Model Runtime     | ONNX Runtime                                                   |
-| Database          | Google Cloud Firestore                                         |
-| Object Storage    | Google Cloud Storage                                           |
-| Containerization  | Docker                                                         |
-| Cloud Deployment  | Google Cloud Run, Artifact Registry                            |
-| CI/CD             | GitHub Actions                                                 |
-| Monitoring        | Application telemetry, model quality and prediction monitoring |
-| Testing           | Python, Rust, API and model integration tests                  |
+[Final report](docs/version1-report.md) · [Development log](docs/development-log.md) · [Architecture](docs/architecture.md) · [Setup](docs/setup.md) · [API](docs/api.md) · [Machine learning](docs/machine-learning.md) · [MLOps](docs/mlops.md) · [Data management](docs/data-management.md) · [Testing](docs/testing.md) · [Deployment](docs/deployment.md)
 
-## Architecture
-
-The proposed architecture separates model training, inference serving, data persistence and release management.
-
-### Model Development
-
-1. Acquire and validate a labelled manufacturing inspection dataset.
-2. Prepare image preprocessing and training pipelines.
-3. Train a TensorFlow image-classification model.
-4. Evaluate classification performance against held-out test data.
-5. Export the trained model to ONNX.
-6. Validate inference compatibility and numerical parity.
-7. Store versioned model artifacts and evaluation metadata.
-
-### Inference Workflow
-
-1. A user uploads an inspection image.
-2. The Rust API validates the request and image format.
-3. The inference service loads the selected model artifact.
-4. Image preprocessing prepares the model input.
-5. ONNX Runtime executes inference.
-6. The API returns a predicted class, confidence score and model version.
-7. Inspection metadata and results are stored in Firestore.
-8. Authorized users can review predictions and submit corrections.
-
-Images and model artifacts will be stored in object storage rather than embedded in Firestore records.
-
-## Machine Learning Approach
-
-The initial implementation will focus on supervised image classification using a suitable manufacturing surface-defect dataset.
-
-Potential approaches include:
-
-- Convolutional neural networks.
-- Transfer learning using a compatible TensorFlow vision model.
-- Data augmentation.
-- Stratified training, validation and test splits.
-- Per-class error analysis.
-- Model calibration and confidence analysis.
-
-A dataset containing only defect categories cannot independently establish reliable defect-free versus defective classification. A production-style pass/fail workflow would require appropriate normal-product examples and further validation.
-
-## Engineering Objectives
-
-This project is intended to demonstrate:
-
-- Practical deep learning model development.
-- TensorFlow training and evaluation.
-- High-performance Rust backend engineering.
-- Model export and cross-runtime inference.
-- Cloud-native storage and persistence.
-- Automated testing and CI/CD.
-- Model validation and controlled releases.
-- Monitoring and continuous model improvement.
-- Reproducible machine learning workflows.
-
-## Evaluation & Performance
-
-Planned measurements include:
-
-| Metric                          | Purpose                                     |
-| ------------------------------- | ------------------------------------------- |
-| Per-class precision and recall  | Evaluate defect classification              |
-| Macro-F1                        | Measure balanced classification quality     |
-| Confusion matrix                | Identify frequently confused defect classes |
-| False-negative rates            | Analyze missed defect categories            |
-| Inference latency               | Measure prediction response time            |
-| Throughput                      | Evaluate Rust serving capacity              |
-| Model parity                    | Compare TensorFlow and ONNX predictions     |
-| Model version performance       | Track model quality across releases         |
-| Prediction distribution changes | Identify potential data or model drift      |
-
-Results will be recorded after training and benchmarking. No performance claims are made before validation.
-
-## CI/CD & MLOps
-
-The planned delivery process separates routine application CI from model-training workflows.
-
-### Application CI
-
-- Run Rust formatting, lint and unit tests.
-- Run Python formatting, lint and tests.
-- Verify API and inference integrations.
-- Build and inspect container images.
-- Validate the configured model artifact.
-
-### Model Validation
-
-- Validate datasets and training metadata.
-- Evaluate candidate models against predefined quality thresholds.
-- Verify TensorFlow-to-ONNX output compatibility.
-- Compare candidate performance against the currently approved model.
-- Reject model releases that fail required quality gates.
-
-### Deployment
-
-- Publish versioned container images.
-- Deploy to a staging environment.
-- Execute integration and inference smoke tests.
-- Promote approved model and service versions.
-- Preserve a rollback path.
-
-Model training will be triggered separately rather than performed automatically on every application code change.
-
-## Development Roadmap
-
-- [ ] Phase 1 — Repository structure, dataset selection and ML environment.
-- [ ] Phase 2 — TensorFlow training pipeline and baseline classifier.
-- [ ] Phase 3 — Model evaluation, export and reproducibility.
-- [ ] Phase 4 — Rust inference API and ONNX integration.
-- [ ] Phase 5 — Firestore, Cloud Storage and inspection dashboard.
-- [ ] Phase 6 — CI/CD and model release quality gates.
-- [ ] Phase 7 — Monitoring, feedback and model lifecycle management.
-- [ ] Phase 8 — Cloud deployment, benchmarking and documentation.
-
-## Project Status
-
-**Planning and initial repository setup.**
-
-The architecture and functionality described above represent the intended implementation. Training results, benchmarks and deployment instructions will be added as functionality is implemented and verified.
-
-## Author
-
-**Keeno Smith**
-
-Full-Stack Software Engineer | AI Engineer
-
-Part of an independent software engineering portfolio focused on machine learning engineering, production-oriented AI systems and cloud-native application development.
+All work remains uncommitted. No staging, commits, pushes, merges or Git history changes were made.

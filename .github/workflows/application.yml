@@ -1,0 +1,82 @@
+name: Application CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  backend-ml-integration:
+    runs-on: ubuntu-latest
+    env:
+      ADMIN_TOKEN: ci-only-disposable-operator-token
+      FIRESTORE_EMULATOR_HOST: localhost:8080
+      ALLOW_SYNTHETIC: "true"
+      MODEL_ARTIFACT_PATH: ../artifacts
+      LOCAL_STORAGE_PATH: ../.storage
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: ml/requirements.txt
+      - run: python -m pip install -r ml/requirements.txt
+      - name: Python lint and artifact contracts
+        run: |
+          ruff check ml scripts
+          pytest ml/tests -q
+          echo "ORT_DYLIB_PATH=$(python scripts/runtime-path.py)" >> "$GITHUB_ENV"
+          echo "QC_TEST_MODEL=$GITHUB_WORKSPACE/tests/fixtures/trained" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - run: cargo fmt --manifest-path backend/Cargo.toml --check
+      - run: cargo clippy --manifest-path backend/Cargo.toml --locked --all-targets -- -D warnings
+      - run: cargo test --manifest-path backend/Cargo.toml --locked
+      - run: cargo build --manifest-path backend/Cargo.toml --release --locked
+      - name: Start emulator
+        run: |
+          docker compose up -d firestore
+          for i in $(seq 1 60); do if curl -fsS http://localhost:8080/; then exit 0; fi; sleep 2; done
+          docker compose logs firestore
+          exit 1
+      - name: Real API lifecycle
+        env:
+          MODEL_ARTIFACT_PATH: artifacts
+          LOCAL_STORAGE_PATH: .storage
+        run: |
+          backend/target/release/manufacturing-qc > api.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsS http://localhost:5050/health; then break; fi; sleep 1; done
+          python scripts/api-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: api-diagnostics
+          path: api.log
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f backend/Dockerfile -t qc-api:ci .
+      - run: docker build -t qc-frontend:ci frontend

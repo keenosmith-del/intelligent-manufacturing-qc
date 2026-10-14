@@ -1,0 +1,185 @@
+{
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "weighted_f1": 1.0,
+  "per_class": {
+    "crazing": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "inclusion": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "patches": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "pitted_surface": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "rolled_in_scale": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "scratches": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      6,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      6,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      6,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ]
+  ],
+  "test_count": 36,
+  "calibration": {
+    "ece": 0.2695780760712094,
+    "bins": [
+      {
+        "lower": 0.4,
+        "count": 2,
+        "accuracy": 1.0,
+        "confidence": 0.49959105253219604
+      },
+      {
+        "lower": 0.5,
+        "count": 10,
+        "accuracy": 1.0,
+        "confidence": 0.5229343175888062
+      },
+      {
+        "lower": 0.7000000000000001,
+        "count": 13,
+        "accuracy": 1.0,
+        "confidence": 0.7896287441253662
+      },
+      {
+        "lower": 0.8,
+        "count": 5,
+        "accuracy": 1.0,
+        "confidence": 0.8124889135360718
+      },
+      {
+        "lower": 0.9,
+        "count": 6,
+        "accuracy": 1.0,
+        "confidence": 0.9565076231956482
+      }
+    ]
+  },
+  "errors": [],
+  "low_confidence": [
+    {
+      "path": "pitted_surface/001.png",
+      "confidence": 0.5401086807250977
+    },
+    {
+      "path": "pitted_surface/012.png",
+      "confidence": 0.5169460773468018
+    },
+    {
+      "path": "pitted_surface/014.png",
+      "confidence": 0.5362160801887512
+    },
+    {
+      "path": "pitted_surface/017.png",
+      "confidence": 0.5390567779541016
+    },
+    {
+      "path": "pitted_surface/022.png",
+      "confidence": 0.5196468234062195
+    },
+    {
+      "path": "pitted_surface/029.png",
+      "confidence": 0.515933096408844
+    },
+    {
+      "path": "rolled_in_scale/002.png",
+      "confidence": 0.5170173048973083
+    },
+    {
+      "path": "rolled_in_scale/003.png",
+      "confidence": 0.5144503712654114
+    },
+    {
+      "path": "rolled_in_scale/004.png",
+      "confidence": 0.5122088193893433
+    },
+    {
+      "path": "rolled_in_scale/017.png",
+      "confidence": 0.5177593231201172
+    },
+    {
+      "path": "rolled_in_scale/032.png",
+      "confidence": 0.49930647015571594
+    },
+    {
+      "path": "rolled_in_scale/035.png",
+      "confidence": 0.49987560510635376
+    }
+  ],
+  "validation_loss": 0.3326686918735504,
+  "validation_accuracy": 1.0,
+  "onnx_latency_ms": 0.23634616627532523,
+  "onnx_p95_ms": 0.24616675000288524,
+  "tensorflow_latency_ms": 0.5281041666320461
+}

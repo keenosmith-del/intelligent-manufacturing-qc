@@ -1,0 +1,12 @@
+{
+  "max_absolute_error": 3.5762786865234375e-07,
+  "tolerance": 1e-05,
+  "same_classes": true,
+  "sample_count": 36,
+  "passed": true,
+  "tensorflow": "2.16.2",
+  "tf2onnx": "1.16.1",
+  "onnxruntime": "1.22.0",
+  "onnx": "1.17.0",
+  "opset": 17
+}

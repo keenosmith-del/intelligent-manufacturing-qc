@@ -1,0 +1,88 @@
+{
+  "native_lifecycle": {
+    "passed": true,
+    "versions": [
+      "ci-d47c157e5f51-a",
+      "ci-d47c157e5f51-b",
+      "ci-d47c157e5f51-bad"
+    ],
+    "inspection_id": "994a604e-ca4a-4bf9-8d2b-95fcc89a9689",
+    "inspections": 86,
+    "mean_inference_ms": 0.40823396511627913,
+    "p95_inference_ms": 0.658833,
+    "active": "ci-d47c157e5f51-a"
+  },
+  "container_lifecycle": {
+    "passed": true,
+    "versions": [
+      "ci-43a2386b5a8d-a",
+      "ci-43a2386b5a8d-b",
+      "ci-43a2386b5a8d-bad"
+    ],
+    "inspection_id": "efdbba6b-8550-4815-bba4-aaae117834b4",
+    "inspections": 33,
+    "mean_inference_ms": 0.3048331818181818,
+    "p95_inference_ms": 0.3765,
+    "active": "ci-43a2386b5a8d-a"
+  },
+  "benchmark": {
+    "requests": 20,
+    "workers": 4,
+    "elapsed_seconds": 0.1988244999993185,
+    "throughput_requests_per_second": 100.5912249248385,
+    "end_to_end_mean_ms": 37.463210450187034,
+    "end_to_end_p95_ms": 87.22108924994245,
+    "inference_mean_ms": 0.8031312500000001,
+    "versions": [
+      "ci-f352b91d32c1-a"
+    ],
+    "scope": "local repeated synthetic fixture"
+  },
+  "unit_checks": {
+    "python_tests": 6,
+    "rust_tests": 9,
+    "frontend_tests": 6,
+    "rust_fmt": true,
+    "clippy": true,
+    "python_lint": true,
+    "frontend_lint": true,
+    "rust_release_build": true,
+    "frontend_build": true
+  },
+  "full_tensorflow_parity_revalidation": {
+    "samples": 36,
+    "runtime": "1.23.2",
+    "max_absolute_error": 4.76837158203125e-07,
+    "passed": true
+  },
+  "limitations": [
+    "Synthetic data only; no industrial model quality evidence",
+    "Cloud integration/deployment not verified",
+    "GitHub workflows not run remotely",
+    "Browser chooser upload tool failed"
+  ],
+  "compose_lifecycle": {
+    "passed": true,
+    "versions": [
+      "ci-24c04d934833-a",
+      "ci-24c04d934833-b",
+      "ci-24c04d934833-bad"
+    ],
+    "inspection_id": "c028ec42-3ab4-4517-a364-f3c9f29b1acc",
+    "inspections": 33,
+    "mean_inference_ms": 0.28545830303030295,
+    "p95_inference_ms": 0.3235,
+    "active": "ci-24c04d934833-a"
+  },
+  "compose_restart": {
+    "model_load_ms": 2.881458,
+    "model_version": "ci-24c04d934833-a",
+    "status": "ready",
+    "restored_expected_version": true,
+    "ports": {
+      "frontend": 5176,
+      "api": 5052,
+      "emulator": 8080
+    }
+  }
+}

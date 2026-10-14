@@ -1,0 +1,39 @@
+services:
+  firestore:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli@sha256:dff831e11d4013af597446d43e1222a9196d9b2b0c8180606bb2e35bf1ea6e03
+    command: gcloud beta emulators firestore start --host-port=0.0.0.0:8080 --project=manufacturing-qc-local --quiet
+    ports: ["127.0.0.1:8080:8080"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports: ["127.0.0.1:${API_PORT:-5050}:5050"]
+    environment:
+      PORT: 5050
+      BIND_ADDRESS: 0.0.0.0
+      FIRESTORE_PROJECT_ID: ${FIRESTORE_PROJECT_ID:-manufacturing-qc-compose}
+      FIRESTORE_EMULATOR_HOST: firestore:8080
+      LOCAL_STORAGE_PATH: /storage
+      MODEL_ARTIFACT_PATH: /artifacts
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?Set ADMIN_TOKEN in the environment}
+      ALLOW_SYNTHETIC: "true"
+      RUST_LOG: info
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-5173}
+    volumes: ["./artifacts:/artifacts:ro", "qc-storage:/storage"]
+    depends_on:
+      firestore: { condition: service_healthy }
+  frontend:
+    build:
+      context: frontend
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-5050}
+    ports: ["127.0.0.1:${FRONTEND_PORT:-5173}:80"]
+    depends_on: [backend]
+
+volumes:
+  qc-storage:

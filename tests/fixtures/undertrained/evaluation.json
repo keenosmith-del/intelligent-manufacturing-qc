@@ -1,0 +1,324 @@
+{
+  "accuracy": 0.6666666666666666,
+  "macro_f1": 0.5555555555555555,
+  "weighted_f1": 0.5555555555555556,
+  "per_class": {
+    "crazing": {
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1-score": 0.6666666666666666,
+      "support": 6.0
+    },
+    "inclusion": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 6.0
+    },
+    "patches": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 6.0
+    },
+    "pitted_surface": {
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1-score": 0.6666666666666666,
+      "support": 6.0
+    },
+    "rolled_in_scale": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    },
+    "scratches": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 6.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      6,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      6,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ]
+  ],
+  "test_count": 36,
+  "calibration": {
+    "ece": 0.24702677379051843,
+    "bins": [
+      {
+        "lower": 0.2,
+        "count": 1,
+        "accuracy": 0.0,
+        "confidence": 0.2999362647533417
+      },
+      {
+        "lower": 0.30000000000000004,
+        "count": 17,
+        "accuracy": 0.7058823529411765,
+        "confidence": 0.3303786516189575
+      },
+      {
+        "lower": 0.5,
+        "count": 12,
+        "accuracy": 0.5,
+        "confidence": 0.5443025827407837
+      },
+      {
+        "lower": 0.7000000000000001,
+        "count": 6,
+        "accuracy": 1.0,
+        "confidence": 0.720361053943634
+      }
+    ]
+  },
+  "errors": [
+    {
+      "path": "inclusion/023.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.519565761089325
+    },
+    {
+      "path": "inclusion/009.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.5191461443901062
+    },
+    {
+      "path": "inclusion/016.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.5141558051109314
+    },
+    {
+      "path": "inclusion/015.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.5114158987998962
+    },
+    {
+      "path": "inclusion/004.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.5105955600738525
+    },
+    {
+      "path": "inclusion/031.png",
+      "actual": "inclusion",
+      "predicted": "crazing",
+      "confidence": 0.510244607925415
+    },
+    {
+      "path": "patches/010.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.30181270837783813
+    },
+    {
+      "path": "patches/029.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.30112943053245544
+    },
+    {
+      "path": "patches/031.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.30095958709716797
+    },
+    {
+      "path": "patches/021.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.30077603459358215
+    },
+    {
+      "path": "patches/022.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.30033668875694275
+    },
+    {
+      "path": "patches/033.png",
+      "actual": "patches",
+      "predicted": "pitted_surface",
+      "confidence": 0.2999362647533417
+    }
+  ],
+  "low_confidence": [
+    {
+      "path": "inclusion/004.png",
+      "confidence": 0.5105955600738525
+    },
+    {
+      "path": "inclusion/009.png",
+      "confidence": 0.5191461443901062
+    },
+    {
+      "path": "inclusion/015.png",
+      "confidence": 0.5114158987998962
+    },
+    {
+      "path": "inclusion/016.png",
+      "confidence": 0.5141558051109314
+    },
+    {
+      "path": "inclusion/023.png",
+      "confidence": 0.519565761089325
+    },
+    {
+      "path": "inclusion/031.png",
+      "confidence": 0.510244607925415
+    },
+    {
+      "path": "patches/010.png",
+      "confidence": 0.30181270837783813
+    },
+    {
+      "path": "patches/021.png",
+      "confidence": 0.30077603459358215
+    },
+    {
+      "path": "patches/022.png",
+      "confidence": 0.30033668875694275
+    },
+    {
+      "path": "patches/029.png",
+      "confidence": 0.30112943053245544
+    },
+    {
+      "path": "patches/031.png",
+      "confidence": 0.30095958709716797
+    },
+    {
+      "path": "patches/033.png",
+      "confidence": 0.2999362647533417
+    },
+    {
+      "path": "pitted_surface/001.png",
+      "confidence": 0.3647395670413971
+    },
+    {
+      "path": "pitted_surface/012.png",
+      "confidence": 0.3632451891899109
+    },
+    {
+      "path": "pitted_surface/014.png",
+      "confidence": 0.36541447043418884
+    },
+    {
+      "path": "pitted_surface/017.png",
+      "confidence": 0.3648354113101959
+    },
+    {
+      "path": "pitted_surface/022.png",
+      "confidence": 0.36409521102905273
+    },
+    {
+      "path": "pitted_surface/029.png",
+      "confidence": 0.3644530177116394
+    },
+    {
+      "path": "rolled_in_scale/002.png",
+      "confidence": 0.32109740376472473
+    },
+    {
+      "path": "rolled_in_scale/003.png",
+      "confidence": 0.3206497132778168
+    },
+    {
+      "path": "rolled_in_scale/004.png",
+      "confidence": 0.32080185413360596
+    },
+    {
+      "path": "rolled_in_scale/017.png",
+      "confidence": 0.3209075927734375
+    },
+    {
+      "path": "rolled_in_scale/032.png",
+      "confidence": 0.3205718398094177
+    },
+    {
+      "path": "rolled_in_scale/035.png",
+      "confidence": 0.32061079144477844
+    },
+    {
+      "path": "scratches/010.png",
+      "confidence": 0.5823699235916138
+    },
+    {
+      "path": "scratches/013.png",
+      "confidence": 0.5747701525688171
+    },
+    {
+      "path": "scratches/015.png",
+      "confidence": 0.5670905113220215
+    },
+    {
+      "path": "scratches/029.png",
+      "confidence": 0.5727939009666443
+    },
+    {
+      "path": "scratches/031.png",
+      "confidence": 0.5662820339202881
+    },
+    {
+      "path": "scratches/035.png",
+      "confidence": 0.5832010507583618
+    }
+  ],
+  "validation_loss": 1.064631700515747,
+  "validation_accuracy": 0.6666666865348816,
+  "onnx_latency_ms": 0.23416774992155195,
+  "onnx_p95_ms": 0.24370850132982014,
+  "tensorflow_latency_ms": 0.4796701389043139
+}
